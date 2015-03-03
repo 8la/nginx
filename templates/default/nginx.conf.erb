@@ -31,7 +31,7 @@ http {
   <% if node['nginx']['disable_access_log'] -%>
   access_log    off;
   <% else -%>
-  access_log	<%= node['nginx']['log_dir'] %>/access.log<% if node['nginx']['access_log_options'] %> <%= node['nginx']['access_log_options'] %><% end %>;
+  access_log    <%= node['nginx']['log_dir'] %>/access.log<% if node['nginx']['access_log_options'] %> <%= node['nginx']['access_log_options'] %><% end %>;
   <% end %>
   <% if node['nginx']['server_tokens'] -%>
   server_tokens <%= node['nginx']['server_tokens'] %>;
@@ -76,6 +76,15 @@ http {
   limit_req_zone $binary_remote_addr zone=<%= node['nginx']['rate_limiting_zone_name'] %>:<%= node['nginx']['rate_limiting_backoff'] %> rate=<%= node['nginx']['rate_limit'] %>;
 
   <% end -%>
+
+  <% if node['nginx']['install_method'] == 'package' %>
+  ssl_protocols <%= node['nginx']['ssl_protocols'] %>;
+  <% elsif node['nginx']['install_method'] == 'source' %>
+      <% if  node['nginx']['source']['modules'].include? 'nginx::http_ssl_module' %>
+  ssl_protocols <%= node['nginx']['ssl_protocols'] %>;
+      <% end %>
+  <% end -%> 
+
   include <%= node['nginx']['dir'] %>/conf.d/*.conf;
   include <%= node['nginx']['dir'] %>/sites-enabled/*;
 }
